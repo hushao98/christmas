@@ -12,6 +12,10 @@ html, body {
     height: 100%;
     overflow: hidden;
     font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* 背景 */
+body {
     background: linear-gradient(180deg, #ff9a9e, #fad0c4);
     color: #fff;
 }
@@ -169,21 +173,11 @@ h1 {
 @keyframes snowFall {
     to { transform: translateY(110vh); }
 }
-
-/* 摄像头提示 */
-#tip{
-    position: fixed;
-    top: 20px;
-    width: 100%;
-    text-align: center;
-    font-size: 18px;
-    color: #fff;
-    z-index: 20;
-}
 </style>
 </head>
 
 <body>
+
 <div class="bg-tree">🎄</div>
 <div class="star">⭐</div>
 
@@ -192,14 +186,11 @@ h1 {
     <div class="name">To 小左 💕</div>
 </div>
 
-<div id="tip">👇 点一下屏幕启动手势交互</div>
-
 <audio id="bgm" loop>
     <source src="https://cdn.pixabay.com/audio/2022/12/05/audio_5a7c3f9db8.mp3">
 </audio>
 
 <script>
-// ---------------- 原点击动画 ----------------
 const messages = [
     "小左，我好像越来越离不开你了",
     "靠你近一点，心就乱一点 💗",
@@ -211,11 +202,111 @@ const messages = [
     "小左，你能不能别走"
 ];
 
-document.addEventListener("click", e => {
-    const bgm = document.getElementById("bgm");
-    if (bgm.paused) bgm.play();
+// =======================
+// 摄像头 + 手势交互
+// =======================
+const video = document.createElement('video');
+video.autoplay = true;
+video.playsInline = true;
+video.style.display = 'none';
+document.body.appendChild(video);
 
-    // 情话
+const canvas = document.createElement('canvas');
+canvas.width = 80;
+canvas.height = 60;
+const ctx = canvas.getContext('2d');
+
+let lastFrame = null;
+let started = false;
+
+function createHearts(x, y){
+    for(let i=0;i<14;i++){
+        const h=document.createElement("div");
+        h.className="heart-burst";
+        h.innerText="💖";
+        h.style.left=x+"px";
+        h.style.top=y+"px";
+        h.style.setProperty("--x",(Math.random()*180-90)+"px");
+        h.style.setProperty("--y",(Math.random()*180-90)+"px");
+        document.body.appendChild(h);
+        setTimeout(()=>h.remove(),1300);
+    }
+}
+
+function createSparks(x, y){
+    for(let i=0;i<8;i++){
+        const s=document.createElement("div");
+        s.className="spark";
+        s.innerText="✨";
+        s.style.left=x+"px";
+        s.style.top=y+"px";
+        s.style.setProperty("--sx",(Math.random()*120-60)+"px");
+        s.style.setProperty("--sy",(Math.random()*120-60)+"px");
+        document.body.appendChild(s);
+        setTimeout(()=>s.remove(),1600);
+    }
+}
+
+// 手势检测
+function detectGesture(){
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const frame = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+
+    if(lastFrame){
+        let diff = 0;
+        for(let i=0;i<frame.length;i+=16){
+            diff += Math.abs(frame[i]-lastFrame[i]);
+        }
+
+        const palmThreshold = 1200; // 张开手
+        const fistThreshold = 300;  // 握拳
+
+        if(diff > palmThreshold){
+            // 手张开
+            createHearts(window.innerWidth/2, window.innerHeight/2);
+            const msg = document.createElement("div");
+            msg.className = "message";
+            msg.innerText = messages[Math.floor(Math.random()*messages.length)];
+            msg.style.left = window.innerWidth/2 + "px";
+            msg.style.top = window.innerHeight/2 + "px";
+            document.body.appendChild(msg);
+            setTimeout(()=>msg.remove(),3000);
+        } else if(diff > fistThreshold){
+            // 手握拳
+            createSparks(window.innerWidth/2, window.innerHeight/2);
+            document.body.style.transform = `translate(${Math.random()*4-2}px,${Math.random()*4-2}px)`;
+            setTimeout(()=>{document.body.style.transform=''},100);
+        }
+    }
+
+    lastFrame = frame;
+    requestAnimationFrame(detectGesture);
+}
+
+// 启动摄像头
+async function startCamera(){
+    try{
+        const stream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:"user"}, audio:false });
+        video.srcObject = stream;
+        await video.play();
+        detectGesture();
+    }catch(e){
+        alert("摄像头启动失败");
+        console.error(e);
+    }
+}
+
+// =======================
+// 点击交互
+// =======================
+document.addEventListener("click", e => {
+    if(started) return;
+    started = true;
+
+    const bgm = document.getElementById("bgm");
+    if(bgm.paused) bgm.play();
+
+    // 生成点击特效（原有）
     const msg = document.createElement("div");
     msg.className = "message";
     msg.innerText = messages[Math.floor(Math.random()*messages.length)];
@@ -224,7 +315,6 @@ document.addEventListener("click", e => {
     document.body.appendChild(msg);
     setTimeout(()=>msg.remove(),3000);
 
-    // 爱心
     for(let i=0;i<14;i++){
         const h=document.createElement("div");
         h.className="heart-burst";
@@ -237,7 +327,6 @@ document.addEventListener("click", e => {
         setTimeout(()=>h.remove(),1300);
     }
 
-    // 星光
     for(let i=0;i<8;i++){
         const s=document.createElement("div");
         s.className="spark";
@@ -249,9 +338,12 @@ document.addEventListener("click", e => {
         document.body.appendChild(s);
         setTimeout(()=>s.remove(),1600);
     }
+
+    // 启动摄像头手势识别
+    startCamera();
 });
 
-// 雪花
+// 雪花效果
 setInterval(()=>{
     const snow=document.createElement("div");
     snow.className="snow";
@@ -263,88 +355,7 @@ setInterval(()=>{
     setTimeout(()=>snow.remove(),10000);
 },350);
 
-// ---------------- 手势交互 ----------------
-const video = document.createElement('video');
-video.autoplay = true;
-video.playsInline = true;
-
-const gestureCanvas = document.createElement('canvas');
-const gestureCtx = gestureCanvas.getContext('2d');
-gestureCanvas.width = 80;
-gestureCanvas.height = 60;
-
-let gestureCooldown = false;
-
-function createHearts(){
-    for(let i=0;i<12;i++){
-        const h=document.createElement("div");
-        h.className="heart-burst";
-        h.innerText="💖";
-        h.style.left=Math.random()*window.innerWidth+"px";
-        h.style.top=Math.random()*window.innerHeight+"px";
-        h.style.setProperty("--x",Math.random()*200-100);
-        h.style.setProperty("--y",Math.random()*200-100);
-        document.body.appendChild(h);
-        setTimeout(()=>h.remove(),1400);
-    }
-}
-
-function createSparks(){
-    for(let i=0;i<10;i++){
-        const s=document.createElement("div");
-        s.className="spark";
-        s.innerText="✨";
-        s.style.left=Math.random()*window.innerWidth+"px";
-        s.style.top=Math.random()*window.innerHeight+"px";
-        s.style.setProperty("--sx",Math.random()*120-60);
-        s.style.setProperty("--sy",Math.random()*120-60);
-        document.body.appendChild(s);
-        setTimeout(()=>s.remove(),1600);
-    }
-}
-
-// 手势检测（简单亮度变化）
-function detectHandGesture(){
-    gestureCtx.drawImage(video, 0,0,gestureCanvas.width,gestureCanvas.height);
-    const frame = gestureCtx.getImageData(0,0,gestureCanvas.width,gestureCanvas.height).data;
-
-    let sum = 0;
-    for(let i=0;i<frame.length;i+=4){ sum += frame[i]; }
-    const avg = sum / (gestureCanvas.width*gestureCanvas.height);
-
-    if(!gestureCooldown){
-        if(avg < 50){ // 张开手掌
-            createHearts();
-            gestureCooldown = true;
-            setTimeout(()=>gestureCooldown=false,1200);
-        } else if(avg > 180){ // 握拳
-            createSparks();
-            gestureCooldown = true;
-            setTimeout(()=>gestureCooldown=false,1200);
-        }
-    }
-
-    requestAnimationFrame(detectHandGesture);
-}
-
-// 启动摄像头
-async function startCamera(){
-    try{
-        const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}});
-        video.srcObject = stream;
-        await video.play();
-        document.getElementById('tip').innerText="✋ 把手放到摄像头前试试";
-        detectHandGesture();
-    }catch(e){
-        alert("摄像头启动失败");
-        console.error(e);
-    }
-}
-
-// 用户点击启动手势
-document.body.addEventListener("click",()=>{
-    startCamera();
-}, {once:true});
 </script>
+
 </body>
 </html>
