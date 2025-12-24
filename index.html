@@ -28,12 +28,9 @@ body::after {
     pointer-events: none;
 }
 
-@keyframes glow {
-    0%,100% { opacity: .4; }
-    50% { opacity: .7; }
-}
+@keyframes glow { 0%,100% { opacity:.4; } 50%{opacity:.7;} }
 
-/* 巨型圣诞树 */
+/* 圣诞树 */
 .bg-tree {
     position: absolute;
     bottom: -40px;
@@ -44,136 +41,35 @@ body::after {
     animation: treeMove 6s ease-in-out infinite;
     pointer-events: none;
 }
-
-@keyframes treeMove {
-    0%,100% { transform: translateX(-50%) scale(1); }
-    50% { transform: translateX(-50%) scale(1.06); }
-}
+@keyframes treeMove { 0%,100%{ transform: translateX(-50%) scale(1); } 50%{ transform: translateX(-50%) scale(1.06); } }
 
 /* 星星 */
-.star {
-    position: absolute;
-    bottom: 360px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 48px;
-    animation: starGlow 2.5s ease-in-out infinite;
-}
+.star { position:absolute; bottom:360px; left:50%; transform:translateX(-50%); font-size:48px; animation:starGlow 2.5s ease-in-out infinite; }
+@keyframes starGlow {0%,100%{opacity:0.6;transform:translateX(-50%) scale(1);}50%{opacity:1;transform:translateX(-50%) scale(1.25);}}
 
-@keyframes starGlow {
-    0%,100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.25); }
-}
+/* 卡片 */
+.card { position:relative; z-index:10; width:88%; max-width:360px; margin:auto; top:50%; transform:translateY(-50%); text-align:center; padding:30px 22px; background:transparent; border-radius:22px; animation: float 4s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(-50%) translateY(0);}50%{transform:translateY(-50%) translateY(-14px);}}
 
-/* 主卡片 */
-.card {
-    position: relative;
-    z-index: 10;
-    width: 88%;
-    max-width: 360px;
-    margin: auto;
-    top: 50%;
-    transform: translateY(-50%);
-    text-align: center;
-    padding: 30px 22px;
-    background: transparent;
-    border-radius: 22px;
-    box-shadow: none;
-    backdrop-filter: none;
-    animation: float 4s ease-in-out infinite;
-}
+h1{font-size:24px;margin-bottom:10px;}
+.name{font-size:20px;margin-bottom:6px;animation:heartbeat 2.4s infinite;}
+@keyframes heartbeat{0%,100%{transform:scale(1);text-shadow:0 0 6px rgba(255,255,255,.4);}50%{transform:scale(1.08);text-shadow:0 0 16px rgba(255,255,255,.9);}}
 
-@keyframes float {
-    0%,100% { transform: translateY(-50%) translateY(0); }
-    50% { transform: translateY(-50%) translateY(-14px); }
-}
+.message{position:absolute;font-size:16px;white-space:nowrap;animation:rise 3s ease-out forwards;pointer-events:none;}
+@keyframes rise{0%{opacity:0;transform:translateY(10px) scale(0.95);}25%{opacity:1;}100%{opacity:0;transform:translateY(-140px) scale(1.08);}}
 
-h1 {
-    font-size: 24px;
-    margin-bottom: 10px;
-}
+.heart-burst{position:absolute;font-size:20px;animation:burst 1.3s ease-out forwards;pointer-events:none;}
+@keyframes burst{0%{transform:scale(0.3);opacity:1;}100%{transform:translate(var(--x),var(--y)) scale(1.4) rotate(360deg);opacity:0;}}
 
-/* 名字：心跳感 */
-.name {
-    font-size: 20px;
-    margin-bottom: 6px;
-    animation: heartbeat 2.4s infinite;
-}
+.spark{position:absolute;font-size:12px;opacity:.8;animation:sparkFly 1.6s linear forwards;pointer-events:none;}
+@keyframes sparkFly{to{transform:translate(var(--sx),var(--sy));opacity:0;}}
 
-@keyframes heartbeat {
-    0%,100% {
-        transform: scale(1);
-        text-shadow: 0 0 6px rgba(255,255,255,.4);
-    }
-    50% {
-        transform: scale(1.08);
-        text-shadow: 0 0 16px rgba(255,255,255,.9);
-    }
-}
-
-/* 情话 */
-.message {
-    position: absolute;
-    font-size: 16px;
-    white-space: nowrap;
-    animation: rise 3s ease-out forwards;
-    pointer-events: none;
-}
-
-@keyframes rise {
-    0% { opacity: 0; transform: translateY(10px) scale(0.95); }
-    25% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-140px) scale(1.08); }
-}
-
-/* 爱心爆炸 */
-.heart-burst {
-    position: absolute;
-    font-size: 20px;
-    animation: burst 1.3s ease-out forwards;
-    pointer-events: none;
-}
-
-@keyframes burst {
-    0% { transform: scale(0.3); opacity: 1; }
-    100% {
-        transform: translate(var(--x), var(--y)) scale(1.4) rotate(360deg);
-        opacity: 0;
-    }
-}
-
-/* 星光粒子 */
-.spark {
-    position: absolute;
-    font-size: 12px;
-    opacity: .8;
-    animation: sparkFly 1.6s linear forwards;
-    pointer-events: none;
-}
-
-@keyframes sparkFly {
-    to {
-        transform: translate(var(--sx), var(--sy));
-        opacity: 0;
-    }
-}
-
-/* 雪 */
-.snow {
-    position: absolute;
-    top: -10px;
-    font-size: 14px;
-    animation: snowFall linear infinite;
-}
-
-@keyframes snowFall {
-    to { transform: translateY(110vh); }
-}
+.snow{position:absolute;top:-10px;font-size:14px;animation:snowFall linear infinite;}
+@keyframes snowFall{to{transform:translateY(110vh);}}
 </style>
 </head>
 
 <body>
-
 <div class="bg-tree">🎄</div>
 <div class="star">⭐</div>
 
@@ -198,17 +94,16 @@ const messages = [
     "小左，你能不能别走"
 ];
 
-// 点击事件触发效果
-document.addEventListener("click", e => {
-    const bgm = document.getElementById("bgm");
-    if (bgm.paused) bgm.play();
+function triggerClickEffect(x,y){
+    const bgm=document.getElementById("bgm");
+    if(bgm.paused) bgm.play();
 
     // 情话
-    const msg = document.createElement("div");
-    msg.className = "message";
-    msg.innerText = messages[Math.floor(Math.random()*messages.length)];
-    msg.style.left = e.clientX + "px";
-    msg.style.top = e.clientY + "px";
+    const msg=document.createElement("div");
+    msg.className="message";
+    msg.innerText=messages[Math.floor(Math.random()*messages.length)];
+    msg.style.left=x+"px";
+    msg.style.top=y+"px";
     document.body.appendChild(msg);
     setTimeout(()=>msg.remove(),3000);
 
@@ -217,8 +112,8 @@ document.addEventListener("click", e => {
         const h=document.createElement("div");
         h.className="heart-burst";
         h.innerText="💖";
-        h.style.left=e.clientX+"px";
-        h.style.top=e.clientY+"px";
+        h.style.left=x+"px";
+        h.style.top=y+"px";
         h.style.setProperty("--x",(Math.random()*180-90)+"px");
         h.style.setProperty("--y",(Math.random()*180-90)+"px");
         document.body.appendChild(h);
@@ -230,13 +125,17 @@ document.addEventListener("click", e => {
         const s=document.createElement("div");
         s.className="spark";
         s.innerText="✨";
-        s.style.left=e.clientX+"px";
-        s.style.top=e.clientY+"px";
+        s.style.left=x+"px";
+        s.style.top=y+"px";
         s.style.setProperty("--sx",(Math.random()*120-60)+"px");
         s.style.setProperty("--sy",(Math.random()*120-60)+"px");
         document.body.appendChild(s);
         setTimeout(()=>s.remove(),1600);
     }
+}
+
+document.addEventListener("click", e=>{
+    triggerClickEffect(e.clientX,e.clientY);
 });
 
 // 雪花
@@ -252,67 +151,52 @@ setInterval(()=>{
 },350);
 </script>
 
-<!-- 手势识别部分 -->
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<!-- 手势识别 -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1646424915/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4.1646424915/drawing_utils.js"></script>
 
 <script>
-const videoElement = document.createElement("video");
-videoElement.style.display = "none";
+const videoElement=document.createElement("video");
+videoElement.style.display="none";
+videoElement.autoplay=true;
+videoElement.playsInline=true;
+videoElement.muted=true;
 document.body.appendChild(videoElement);
 
-const hands = new Hands({
-    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-});
-hands.setOptions({
-    maxNumHands: 1,
-    modelComplexity: 1,
-    minDetectionConfidence: 0.7,
-    minTrackingConfidence: 0.6
-});
+const hands=new Hands({locateFile:(file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`});
+hands.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:0.7,minTrackingConfidence:0.6});
 hands.onResults(onHandResults);
 
-const camera = new Camera(videoElement, {
-    onFrame: async () => { await hands.send({image: videoElement}); },
-    width: 640,
-    height: 480
-});
+const camera=new Camera(videoElement,{onFrame:async()=>{await hands.send({image:videoElement});},width:640,height:480});
 camera.start();
 
-// 手势识别逻辑
-function onHandResults(results) {
-    if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) return;
-    const landmarks = results.multiHandLandmarks[0];
+let lastGestureTime=0;
+function onHandResults(results){
+    if(!results.multiHandLandmarks || results.multiHandLandmarks.length===0) return;
+    const landmarks=results.multiHandLandmarks[0];
 
-    const thumbUp = landmarks[4].y < landmarks[3].y;
-    const indexUp = landmarks[8].y < landmarks[6].y;
-    const middleUp = landmarks[12].y < landmarks[10].y;
-    const ringUp = landmarks[16].y < landmarks[14].y;
-    const pinkyUp = landmarks[20].y < landmarks[18].y;
+    const fingersUp=[
+        landmarks[4].y < landmarks[3].y,
+        landmarks[8].y < landmarks[6].y,
+        landmarks[12].y < landmarks[10].y,
+        landmarks[16].y < landmarks[14].y,
+        landmarks[20].y < landmarks[18].y
+    ];
 
-    if (thumbUp && indexUp && middleUp && ringUp && pinkyUp) {
-        triggerHandEffect("palm");
-    } else if (indexUp && !middleUp && !ringUp && !pinkyUp) {
-        triggerHandEffect("point");
-    } else if (!thumbUp && !indexUp && !middleUp && !ringUp && !pinkyUp) {
-        triggerHandEffect("fist");
+    const now=Date.now();
+    if(now-lastGestureTime<800) return;
+    lastGestureTime=now;
+
+    const x=window.innerWidth/2;
+    const y=window.innerHeight/2;
+
+    // 张开手掌
+    if(fingersUp.filter(Boolean).length>=4){
+        triggerClickEffect(x,y);
     }
-}
-
-let lastGestureTime = 0;
-function triggerHandEffect(gesture) {
-    const now = Date.now();
-    if (now - lastGestureTime < 800) return;
-    lastGestureTime = now;
-
-    const x = window.innerWidth/2;
-    const y = window.innerHeight/2;
-
-    if (gesture === "palm") {
-        const event = new MouseEvent("click", {clientX: x, clientY: y});
-        document.dispatchEvent(event);
-    } else if (gesture === "point") {
+    // 食指指向
+    else if(fingersUp[1] && fingersUp.slice(2).filter(Boolean).length===0){
         for(let i=0;i<12;i++){
             const s=document.createElement("div");
             s.className="spark";
@@ -324,7 +208,9 @@ function triggerHandEffect(gesture) {
             document.body.appendChild(s);
             setTimeout(()=>s.remove(),1600);
         }
-    } else if (gesture === "fist") {
+    }
+    // 握拳
+    else if(fingersUp.filter(Boolean).length===0){
         for(let i=0;i<20;i++){
             const snow=document.createElement("div");
             snow.className="snow";
