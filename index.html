@@ -5,9 +5,8 @@
   <title>🎄 平安夜快乐</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- MediaPipe Hands -->
+  <!-- MediaPipe Hands（只用 hands + drawing） -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
   <style>
@@ -37,7 +36,7 @@
 </head>
 
 <body>
-  <div id="tip">👇 点一下屏幕，然后对着镜头张开手掌 ✋</div>
+  <div id="tip">👇 点一下屏幕，允许摄像头</div>
 
   <video id="video" playsinline></video>
   <canvas id="canvas"></canvas>
@@ -53,6 +52,7 @@
 
     let started = false;
 
+    // 初始化 Hands
     const hands = new Hands({
       locateFile: (file) =>
         `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
@@ -70,8 +70,8 @@
 
       if (!results.multiHandLandmarks) return;
 
-      // 画手部骨架（这是最重要的调试确认）
       for (const landmarks of results.multiHandLandmarks) {
+        // 画骨架（关键调试信号）
         drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
           color: "#00FF00",
           lineWidth: 4,
@@ -81,44 +81,48 @@
           lineWidth: 2,
         });
 
-        // 判断是否“张开手掌”
+        // 简单判断：张开手
         const thumb = landmarks[4];
-        const index = landmarks[8];
         const pinky = landmarks[20];
 
-        const open =
-          Math.abs(thumb.x - pinky.x) > 0.25 &&
-          index.y < landmarks[6].y;
-
-        if (open) {
+        if (Math.abs(thumb.x - pinky.x) > 0.25) {
           tip.innerText = "🎄 平安夜快乐！";
           tip.style.color = "lime";
         }
       }
     });
 
-    // 必须点击页面后才能启动（手机浏览器强制要求）
-    document.body.addEventListener("click", async () => {
-      if (started) return;
-      started = true;
-
-      tip.innerText = "📷 摄像头启动中…";
-
-      const camera = new Camera(video, {
-        onFrame: async () => {
-          await hands.send({ image: video });
-        },
-        width: 640,
-        height: 480,
-      });
-
+    async function startCamera() {
       try {
-        await camera.start();
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+          },
+          audio: false,
+        });
+
+        video.srcObject = stream;
+        await video.play();
+
         tip.innerText = "✋ 请对着镜头张开手掌";
+
+        async function frameLoop() {
+          await hands.send({ image: video });
+          requestAnimationFrame(frameLoop);
+        }
+
+        frameLoop();
       } catch (e) {
-        alert("摄像头启动失败，请检查权限");
+        alert("摄像头启动失败");
         console.error(e);
       }
+    }
+
+    // 必须用户点击
+    document.body.addEventListener("click", () => {
+      if (started) return;
+      started = true;
+      startCamera();
     });
   </script>
 </body>
