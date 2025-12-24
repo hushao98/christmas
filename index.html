@@ -174,10 +174,6 @@ h1 {
     to { transform: translateY(110vh); }
 }
 
-/* 摄像头 canvas */
-#videoCanvas {
-    display:none;
-}
 </style>
 </head>
 
@@ -195,8 +191,8 @@ h1 {
     <source src="https://cdn.pixabay.com/audio/2022/12/05/audio_5a7c3f9db8.mp3">
 </audio>
 
-<video id="video" playsinline autoplay muted></video>
-<canvas id="videoCanvas" width="80" height="60"></canvas>
+<!-- 手势摄像头 -->
+<video id="handVideo" playsinline autoplay muted style="display:none;"></video>
 
 <script>
 const messages = [
@@ -210,52 +206,53 @@ const messages = [
     "小左，你能不能别走"
 ];
 
-const video = document.getElementById("video");
-const canvas = document.getElementById("videoCanvas");
-const ctx = canvas.getContext("2d");
+const handVideo = document.getElementById("handVideo");
 let lastFrame = null;
-let gestureCooldown = false;
+let handDetectionStarted = false;
 
-// 触发页面特效
-function triggerEffects(x = window.innerWidth/2, y = window.innerHeight/2){
+// 点击播放音乐+启动手势
+document.addEventListener("click", e => {
     const bgm = document.getElementById("bgm");
     if (bgm.paused) bgm.play();
 
-    // 情话
+    // 原来的点击效果
     const msg = document.createElement("div");
     msg.className = "message";
     msg.innerText = messages[Math.floor(Math.random()*messages.length)];
-    msg.style.left = x + "px";
-    msg.style.top = y + "px";
+    msg.style.left = e.clientX + "px";
+    msg.style.top = e.clientY + "px";
     document.body.appendChild(msg);
     setTimeout(()=>msg.remove(),3000);
 
-    // 爱心
     for(let i=0;i<14;i++){
         const h=document.createElement("div");
         h.className="heart-burst";
         h.innerText="💖";
-        h.style.left=x+"px";
-        h.style.top=y+"px";
+        h.style.left=e.clientX+"px";
+        h.style.top=e.clientY+"px";
         h.style.setProperty("--x",(Math.random()*180-90)+"px");
         h.style.setProperty("--y",(Math.random()*180-90)+"px");
         document.body.appendChild(h);
         setTimeout(()=>h.remove(),1300);
     }
 
-    // 星光
     for(let i=0;i<8;i++){
         const s=document.createElement("div");
         s.className="spark";
         s.innerText="✨";
-        s.style.left=x+"px";
-        s.style.top=y+"px";
+        s.style.left=e.clientX+"px";
+        s.style.top=e.clientY+"px";
         s.style.setProperty("--sx",(Math.random()*120-60)+"px");
         s.style.setProperty("--sy",(Math.random()*120-60)+"px");
         document.body.appendChild(s);
         setTimeout(()=>s.remove(),1600);
     }
-}
+
+    // 启动手势检测一次
+    if(!handDetectionStarted){
+        startHandDetection();
+    }
+});
 
 // 雪花
 setInterval(()=>{
@@ -269,45 +266,67 @@ setInterval(()=>{
     setTimeout(()=>snow.remove(),10000);
 },350);
 
-// 点击触发
-document.addEventListener("click", e => {
-    triggerEffects(e.clientX, e.clientY);
-});
-
-// 手势检测（靠近摄像头）
-async function startCamera(){
+// 手势检测
+async function startHandDetection() {
     try{
-        const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}, audio:false});
-        video.srcObject = stream;
-        await video.play();
-
-        function detectMotion(){
-            ctx.drawImage(video,0,0,canvas.width,canvas.height);
-            const frame = ctx.getImageData(0,0,canvas.width,canvas.height).data;
-            if(lastFrame && !gestureCooldown){
-                let diff = 0;
-                for(let i=0;i<frame.length;i+=16){
-                    diff += Math.abs(frame[i] - lastFrame[i]);
-                }
-                if(diff > 1200){
-                    triggerEffects();
-                    gestureCooldown = true;
-                    setTimeout(()=>gestureCooldown=false,1200); // 冷却，防止重复触发
-                }
-            }
-            lastFrame = frame;
-            requestAnimationFrame(detectMotion);
-        }
-        detectMotion();
-    }catch(e){
-        console.warn("摄像头启动失败", e);
+        const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false});
+        handVideo.srcObject = stream;
+        await handVideo.play();
+        handDetectionStarted = true;
+        detectHandLoop();
+    } catch(e){
+        console.error("手势摄像头启动失败", e);
     }
 }
 
-// 用户必须点击一次才能启动摄像头
-document.body.addEventListener("click",()=>{
-    startCamera();
-});
+function detectHandLoop() {
+    if (!handDetectionStarted) return;
+    const tmpCanvas = document.createElement("canvas");
+    const tmpCtx = tmpCanvas.getContext("2d");
+    tmpCanvas.width = 80;
+    tmpCanvas.height = 60;
+
+    function loop(){
+        tmpCtx.drawImage(handVideo,0,0,tmpCanvas.width,tmpCanvas.height);
+        const frame = tmpCtx.getImageData(0,0,tmpCanvas.width,tmpCanvas.height).data;
+
+        if(lastFrame){
+            let diff = 0;
+            for(let i=0;i<frame.length;i+=4){
+                diff += Math.abs(frame[i]-lastFrame[i]);
+            }
+            if(diff > 1500){
+                triggerHandEffect();
+            }
+        }
+        lastFrame = frame;
+        requestAnimationFrame(loop);
+    }
+    loop();
+}
+
+// 手势触发效果
+function triggerHandEffect(){
+    const msg = document.createElement("div");
+    msg.className = "message";
+    msg.innerText = messages[Math.floor(Math.random()*messages.length)];
+    msg.style.left = (window.innerWidth/2 + (Math.random()*60-30)) + "px";
+    msg.style.top = (window.innerHeight/2 + (Math.random()*60-30)) + "px";
+    document.body.appendChild(msg);
+    setTimeout(()=>msg.remove(),3000);
+
+    for(let i=0;i<14;i++){
+        const h=document.createElement("div");
+        h.className="heart-burst";
+        h.innerText="💖";
+        h.style.left = (window.innerWidth/2 + (Math.random()*60-30)) + "px";
+        h.style.top = (window.innerHeight/2 + (Math.random()*60-30)) + "px";
+        h.style.setProperty("--x",(Math.random()*180-90)+"px");
+        h.style.setProperty("--y",(Math.random()*180-90)+"px");
+        document.body.appendChild(h);
+        setTimeout(()=>h.remove(),1300);
+    }
+}
 </script>
 
 </body>
