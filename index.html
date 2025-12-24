@@ -1,129 +1,121 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <title>🎄 平安夜快乐</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<title>🎄 平安夜快乐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- MediaPipe Hands（只用 hands + drawing） -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<style>
+html,body{
+  margin:0;
+  padding:0;
+  background:linear-gradient(180deg,#ff9a9e,#fad0c4);
+  overflow:hidden;
+  font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+}
 
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      color: white;
-      text-align: center;
-      overflow: hidden;
-      font-family: sans-serif;
-    }
-    #tip {
-      position: fixed;
-      top: 20px;
-      width: 100%;
-      font-size: 20px;
-      z-index: 10;
-    }
-    canvas {
-      width: 100vw;
-      height: 100vh;
-    }
-    video {
-      display: none;
-    }
-  </style>
+#tip{
+  position:fixed;
+  top:20px;
+  width:100%;
+  text-align:center;
+  color:#fff;
+  font-size:18px;
+  z-index:10;
+}
+
+video{display:none}
+
+.heart{
+  position:absolute;
+  font-size:22px;
+  animation:fly 1.4s ease-out forwards;
+  pointer-events:none;
+}
+
+@keyframes fly{
+  from{opacity:1;transform:scale(.6)}
+  to{
+    opacity:0;
+    transform:
+      translate(
+        calc(var(--x) * 1px),
+        calc(var(--y) * 1px)
+      )
+      scale(1.4)
+      rotate(360deg);
+  }
+}
+</style>
 </head>
 
 <body>
-  <div id="tip">👇 点一下屏幕，允许摄像头</div>
+<div id="tip">👇 点一下屏幕，允许摄像头</div>
 
-  <video id="video" playsinline></video>
-  <canvas id="canvas"></canvas>
+<video id="video" playsinline></video>
+<canvas id="canvas" width="80" height="60"></canvas>
 
-  <script>
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const tip = document.getElementById("tip");
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const tip = document.getElementById("tip");
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+let lastFrame = null;
+let started = false;
 
-    let started = false;
+function createHearts(){
+  for(let i=0;i<12;i++){
+    const h=document.createElement("div");
+    h.className="heart";
+    h.innerText="💖";
+    h.style.left=Math.random()*window.innerWidth+"px";
+    h.style.top=Math.random()*window.innerHeight+"px";
+    h.style.setProperty("--x",Math.random()*200-100);
+    h.style.setProperty("--y",Math.random()*200-100);
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),1400);
+  }
+}
 
-    // 初始化 Hands
-    const hands = new Hands({
-      locateFile: (file) =>
-        `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
-    });
+function detectMotion(){
+  ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  const frame = ctx.getImageData(0,0,canvas.width,canvas.height).data;
 
-    hands.setOptions({
-      maxNumHands: 1,
-      modelComplexity: 1,
-      minDetectionConfidence: 0.7,
-      minTrackingConfidence: 0.7,
-    });
-
-    hands.onResults((results) => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (!results.multiHandLandmarks) return;
-
-      for (const landmarks of results.multiHandLandmarks) {
-        // 画骨架（关键调试信号）
-        drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
-          color: "#00FF00",
-          lineWidth: 4,
-        });
-        drawLandmarks(ctx, landmarks, {
-          color: "#FF0000",
-          lineWidth: 2,
-        });
-
-        // 简单判断：张开手
-        const thumb = landmarks[4];
-        const pinky = landmarks[20];
-
-        if (Math.abs(thumb.x - pinky.x) > 0.25) {
-          tip.innerText = "🎄 平安夜快乐！";
-          tip.style.color = "lime";
-        }
-      }
-    });
-
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "user",
-          },
-          audio: false,
-        });
-
-        video.srcObject = stream;
-        await video.play();
-
-        tip.innerText = "✋ 请对着镜头张开手掌";
-
-        async function frameLoop() {
-          await hands.send({ image: video });
-          requestAnimationFrame(frameLoop);
-        }
-
-        frameLoop();
-      } catch (e) {
-        alert("摄像头启动失败");
-        console.error(e);
-      }
+  if(lastFrame){
+    let diff = 0;
+    for(let i=0;i<frame.length;i+=16){
+      diff += Math.abs(frame[i] - lastFrame[i]);
     }
+    if(diff > 1200){
+      tip.innerText = "🎄 平安夜快乐 ✨";
+      createHearts();
+    }
+  }
+  lastFrame = frame;
+  requestAnimationFrame(detectMotion);
+}
 
-    // 必须用户点击
-    document.body.addEventListener("click", () => {
-      if (started) return;
-      started = true;
-      startCamera();
+async function startCamera(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:"user"},
+      audio:false
     });
-  </script>
+    video.srcObject = stream;
+    await video.play();
+    tip.innerText="✋ 把手放到镜头前试试";
+    detectMotion();
+  }catch(e){
+    alert("摄像头启动失败");
+  }
+}
+
+document.body.addEventListener("click",()=>{
+  if(started) return;
+  started=true;
+  startCamera();
+});
+</script>
 </body>
 </html>
