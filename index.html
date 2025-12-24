@@ -1,305 +1,125 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>平安夜快乐 🎄</title>
+  <meta charset="UTF-8" />
+  <title>🎄 平安夜快乐</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<style>
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-}
+  <!-- MediaPipe Hands -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
-/* 背景 */
-body {
-    background: linear-gradient(180deg, #ff9a9e, #fad0c4);
-    color: #fff;
-}
-
-/* 柔光 */
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle,
-        rgba(255,255,255,0.2),
-        rgba(255,255,255,0) 60%);
-    animation: glow 6s ease-in-out infinite;
-    pointer-events: none;
-}
-
-@keyframes glow {
-    0%,100% { opacity: .4; }
-    50% { opacity: .7; }
-}
-
-/* 圣诞树 */
-.bg-tree {
-    position: absolute;
-    bottom: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 320px;
-    opacity: 0.28;
-    animation: treeMove 6s ease-in-out infinite;
-    pointer-events: none;
-}
-
-@keyframes treeMove {
-    0%,100% { transform: translateX(-50%) scale(1); }
-    50% { transform: translateX(-50%) scale(1.06); }
-}
-
-/* 星星 */
-.star {
-    position: absolute;
-    bottom: 360px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 48px;
-    animation: starGlow 2.5s ease-in-out infinite;
-}
-
-@keyframes starGlow {
-    0%,100% { opacity: .6; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.25); }
-}
-
-/* 卡片 */
-.card {
-    position: relative;
-    z-index: 10;
-    width: 88%;
-    max-width: 360px;
-    margin: auto;
-    top: 50%;
-    transform: translateY(-50%);
-    text-align: center;
-    padding: 30px 22px;
-    animation: float 4s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%,100% { transform: translateY(-50%) translateY(0); }
-    50% { transform: translateY(-50%) translateY(-14px); }
-}
-
-h1 { font-size: 24px; }
-
-.name {
-    font-size: 20px;
-    animation: heartbeat 2.4s infinite;
-}
-
-@keyframes heartbeat {
-    0%,100% { transform: scale(1); }
-    50% { transform: scale(1.08); }
-}
-
-/* 情话 */
-.message {
-    position: absolute;
-    font-size: 16px;
-    white-space: nowrap;
-    animation: rise 3s ease-out forwards;
-    pointer-events: none;
-}
-
-@keyframes rise {
-    0% { opacity: 0; transform: translateY(10px); }
-    25% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-140px); }
-}
-
-/* 爱心 */
-.heart-burst {
-    position: absolute;
-    font-size: 20px;
-    animation: burst 1.3s ease-out forwards;
-    pointer-events: none;
-}
-
-@keyframes burst {
-    to {
-        transform: translate(var(--x), var(--y)) scale(1.4) rotate(360deg);
-        opacity: 0;
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      text-align: center;
+      overflow: hidden;
+      font-family: sans-serif;
     }
-}
-
-/* 星光 */
-.spark {
-    position: absolute;
-    font-size: 12px;
-    animation: sparkFly 1.6s linear forwards;
-    pointer-events: none;
-}
-
-@keyframes sparkFly {
-    to {
-        transform: translate(var(--sx), var(--sy));
-        opacity: 0;
+    #tip {
+      position: fixed;
+      top: 20px;
+      width: 100%;
+      font-size: 20px;
+      z-index: 10;
     }
-}
-
-/* 雪 */
-.snow {
-    position: absolute;
-    top: -10px;
-    animation: snowFall linear infinite;
-}
-
-@keyframes snowFall {
-    to { transform: translateY(110vh); }
-}
-
-/* 心跳闪光 */
-body.heartbeat {
-    animation: beatFlash .8s ease;
-}
-
-@keyframes beatFlash {
-    50% { filter: brightness(1.25) saturate(1.3); }
-}
-</style>
-
-<!-- MediaPipe -->
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.min.js"></script>
-
+    canvas {
+      width: 100vw;
+      height: 100vh;
+    }
+    video {
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
+  <div id="tip">👇 点一下屏幕，然后对着镜头张开手掌 ✋</div>
 
-<div class="bg-tree">🎄</div>
-<div class="star">⭐</div>
+  <video id="video" playsinline></video>
+  <canvas id="canvas"></canvas>
 
-<div class="card">
-    <h1>平安夜快乐</h1>
-    <div class="name">To 小左 💕</div>
-</div>
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const tip = document.getElementById("tip");
 
-<audio id="bgm" loop>
-    <source src="https://cdn.pixabay.com/audio/2022/12/05/audio_5a7c3f9db8.mp3">
-</audio>
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-<video id="video" playsinline style="display:none;"></video>
+    let started = false;
 
-<script>
-const messages = [
-    "小左，我好像越来越离不开你了",
-    "靠你近一点，心就乱一点 💗",
-    "如果可以，我想一直这样陪着你",
-    "你在的时候，我什么都不想要",
-    "今晚有点甜，大概是你在我心里",
-    "我好像开始习惯你了",
-    "平安夜，只想被你抱紧",
-    "小左，你能不能别走"
-];
+    const hands = new Hands({
+      locateFile: (file) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+    });
 
-/* 点击互动 */
-document.addEventListener("click", e => {
-    const bgm = document.getElementById("bgm");
-    if (bgm.paused) bgm.play();
-    spawnMessage(e.clientX, e.clientY);
-    spawnHearts(e.clientX, e.clientY, 14);
-    spawnSparks(e.clientX, e.clientY);
-});
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.7,
+    });
 
-/* 公共函数 */
-function spawnMessage(x,y){
-    const m=document.createElement("div");
-    m.className="message";
-    m.innerText=messages[Math.random()*messages.length|0];
-    m.style.left=x+"px";
-    m.style.top=y+"px";
-    document.body.appendChild(m);
-    setTimeout(()=>m.remove(),3000);
-}
+    hands.onResults((results) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function spawnHearts(x,y,n){
-    for(let i=0;i<n;i++){
-        const h=document.createElement("div");
-        h.className="heart-burst";
-        h.innerText="💖";
-        h.style.left=x+"px";
-        h.style.top=y+"px";
-        h.style.setProperty("--x",(Math.random()*240-120)+"px");
-        h.style.setProperty("--y",(Math.random()*240-120)+"px");
-        document.body.appendChild(h);
-        setTimeout(()=>h.remove(),1300);
-    }
-}
+      if (!results.multiHandLandmarks) return;
 
-function spawnSparks(x,y){
-    for(let i=0;i<8;i++){
-        const s=document.createElement("div");
-        s.className="spark";
-        s.innerText="✨";
-        s.style.left=x+"px";
-        s.style.top=y+"px";
-        s.style.setProperty("--sx",(Math.random()*120-60)+"px");
-        s.style.setProperty("--sy",(Math.random()*120-60)+"px");
-        document.body.appendChild(s);
-        setTimeout(()=>s.remove(),1600);
-    }
-}
+      // 画手部骨架（这是最重要的调试确认）
+      for (const landmarks of results.multiHandLandmarks) {
+        drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
+          color: "#00FF00",
+          lineWidth: 4,
+        });
+        drawLandmarks(ctx, landmarks, {
+          color: "#FF0000",
+          lineWidth: 2,
+        });
 
-/* 雪 */
-setInterval(()=>{
-    const snow=document.createElement("div");
-    snow.className="snow";
-    snow.innerText="❄️";
-    snow.style.left=Math.random()*innerWidth+"px";
-    snow.style.fontSize=(Math.random()*10+10)+"px";
-    snow.style.animationDuration=(Math.random()*5+5)+"s";
-    document.body.appendChild(snow);
-    setTimeout(()=>snow.remove(),10000);
-},350);
+        // 判断是否“张开手掌”
+        const thumb = landmarks[4];
+        const index = landmarks[8];
+        const pinky = landmarks[20];
 
-/* 手势识别 */
-const hands=new Hands({
-    locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
-});
-hands.setOptions({maxNumHands:1,minDetectionConfidence:.7,minTrackingConfidence:.7});
+        const open =
+          Math.abs(thumb.x - pinky.x) > 0.25 &&
+          index.y < landmarks[6].y;
 
-let last=0;
-hands.onResults(r=>{
-    if(!r.multiHandLandmarks)return;
-    if(Date.now()-last<1500)return;
-    const lm=r.multiHandLandmarks[0];
-    const up=(t,p)=>t.y<p.y;
-    const index=up(lm[8],lm[6]);
-    const middle=up(lm[12],lm[10]);
-    const ring=up(lm[16],lm[14]);
-    const pinky=up(lm[20],lm[18]);
-    const x=lm[8].x*innerWidth;
-    const y=lm[8].y*innerHeight;
+        if (open) {
+          tip.innerText = "🎄 平安夜快乐！";
+          tip.style.color = "lime";
+        }
+      }
+    });
 
-    if(index&&middle&&ring&&pinky){
-        spawnHearts(x,y,30);
-        spawnMessage(x,y);
-        last=Date.now();
-    }
-    if(!index&&!middle&&!ring&&!pinky){
-        document.body.classList.add("heartbeat");
-        setTimeout(()=>document.body.classList.remove("heartbeat"),800);
-        last=Date.now();
-    }
-    if(index&&!middle&&!ring&&!pinky){
-        spawnMessage(x,y);
-        last=Date.now();
-    }
-});
+    // 必须点击页面后才能启动（手机浏览器强制要求）
+    document.body.addEventListener("click", async () => {
+      if (started) return;
+      started = true;
 
-new Camera(document.getElementById("video"),{
-    onFrame:async()=>hands.send({image:video}),
-    width:640,height:480
-}).start();
-</script>
+      tip.innerText = "📷 摄像头启动中…";
 
+      const camera = new Camera(video, {
+        onFrame: async () => {
+          await hands.send({ image: video });
+        },
+        width: 640,
+        height: 480,
+      });
+
+      try {
+        await camera.start();
+        tip.innerText = "✋ 请对着镜头张开手掌";
+      } catch (e) {
+        alert("摄像头启动失败，请检查权限");
+        console.error(e);
+      }
+    });
+  </script>
 </body>
 </html>
