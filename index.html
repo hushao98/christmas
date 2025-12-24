@@ -2,17 +2,17 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>炫酷手势交互</title>
+<title>🎄 平安夜快乐</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 html,body{
   margin:0;
   padding:0;
+  height:100%;
+  background:linear-gradient(180deg,#ff9a9e,#fad0c4);
   overflow:hidden;
-  background:black;
-  font-family:sans-serif;
-  touch-action:none;
+  font-family:"PingFang SC","Microsoft YaHei",sans-serif;
 }
 
 #tip{
@@ -20,101 +20,90 @@ html,body{
   top:20px;
   width:100%;
   text-align:center;
-  color:#00ffea;
-  font-size:18px;
+  color:#fff;
+  font-size:20px;
   z-index:10;
 }
 
-video{display:none}
+video{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0.25;
+}
 
-.particle{
+.heart{
   position:absolute;
-  font-size:18px;
+  font-size:26px;
+  animation:fly 1.5s ease-out forwards;
   pointer-events:none;
-  animation:fly 1.5s linear forwards;
 }
 
 @keyframes fly{
-  from{opacity:1; transform:scale(0.6);}
+  from{opacity:1;transform:scale(.6)}
   to{
     opacity:0;
-    transform:translate(calc(var(--x)*1px), calc(var(--y)*1px)) scale(1.4) rotate(360deg);
+    transform:
+      translate(
+        calc(var(--x) * 1px),
+        calc(var(--y) * 1px)
+      )
+      scale(1.6)
+      rotate(360deg);
   }
 }
 </style>
 </head>
 
 <body>
-<div id="tip">👇 点一下屏幕，然后对着镜头挥动手掌 ✋</div>
+
+<div id="tip">👇 点一下屏幕</div>
 <video id="video" playsinline autoplay muted></video>
-<canvas id="canvas"></canvas>
 
 <script>
 const tip = document.getElementById("tip");
 const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
 let started = false;
-let lastFrame = null;
 
-// 生成粒子效果
-function createParticles(count=15){
-  for(let i=0;i<count;i++){
-    const p=document.createElement("div");
-    p.className="particle";
-    p.innerText="✨";
-    p.style.left=Math.random()*window.innerWidth+"px";
-    p.style.top=Math.random()*window.innerHeight+"px";
-    p.style.setProperty("--x",Math.random()*300-150);
-    p.style.setProperty("--y",Math.random()*300-150);
-    p.style.color=`hsl(${Math.random()*360},100%,70%)`;
-    document.body.appendChild(p);
-    setTimeout(()=>p.remove(),1500);
+function hearts(){
+  for(let i=0;i<18;i++){
+    const h=document.createElement("div");
+    h.className="heart";
+    h.innerText="💖";
+    h.style.left=Math.random()*innerWidth+"px";
+    h.style.top=Math.random()*innerHeight+"px";
+    h.style.setProperty("--x",Math.random()*240-120);
+    h.style.setProperty("--y",Math.random()*240-120);
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),1500);
   }
 }
 
-// 检测画面变化（手势靠近）
-function detectMotion(){
-  ctx.drawImage(video,0,0,canvas.width,canvas.height);
-  const frame=ctx.getImageData(0,0,canvas.width,canvas.height).data;
-  
-  if(lastFrame){
-    let diff=0;
-    for(let i=0;i<frame.length;i+=16){
-      diff+=Math.abs(frame[i]-lastFrame[i]);
-    }
-    if(diff>1500){ // 调节灵敏度
-      tip.innerText="🌟 手势触发特效！";
-      createParticles(20);
-    }
-  }
-  lastFrame=frame;
-  requestAnimationFrame(detectMotion);
-}
-
-async function startCamera(){
+async function start(){
   try{
-    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false});
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:"user"},
+      audio:false
+    });
     video.srcObject = stream;
-    await video.play();
-    tip.innerText="✨ 对着镜头挥动手掌触发特效";
-    detectMotion();
+
+    // ⚠️ 不做任何帧处理
+    tip.innerText = "🎄 平安夜快乐 ✨";
+    hearts();
+
   }catch(e){
     alert("摄像头启动失败");
-    console.error(e);
   }
 }
 
-// 点击屏幕启动
 document.body.addEventListener("click",()=>{
   if(started) return;
-  started=true;
-  startCamera();
+  started = true;
+  start();
 });
 </script>
+
 </body>
 </html>
