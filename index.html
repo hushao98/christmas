@@ -2,362 +2,107 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<title>🎄 平安夜快乐</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>平安夜快乐 🎄</title>
 
 <style>
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+  background:linear-gradient(180deg,#ff9a9e,#fad0c4);
+  overflow:hidden;
+  font-family:"PingFang SC","Microsoft YaHei",sans-serif;
 }
 
-/* 背景 */
-body {
-    background: linear-gradient(180deg, #ff9a9e, #fad0c4);
-    color: #fff;
+#tip{
+  position:fixed;
+  top:20px;
+  width:100%;
+  text-align:center;
+  color:#fff;
+  font-size:20px;
+  z-index:10;
 }
 
-/* 背景柔光呼吸 */
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at center,
-        rgba(255,255,255,0.18),
-        rgba(255,255,255,0) 60%);
-    animation: glow 6s ease-in-out infinite;
-    pointer-events: none;
+video{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0.25;
 }
 
-@keyframes glow {
-    0%,100% { opacity: .4; }
-    50% { opacity: .7; }
+.heart{
+  position:absolute;
+  font-size:26px;
+  animation:fly 1.5s ease-out forwards;
+  pointer-events:none;
 }
 
-/* 巨型圣诞树 */
-.bg-tree {
-    position: absolute;
-    bottom: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 320px;
-    opacity: 0.28;
-    animation: treeMove 6s ease-in-out infinite;
-    pointer-events: none;
-}
-
-@keyframes treeMove {
-    0%,100% { transform: translateX(-50%) scale(1); }
-    50% { transform: translateX(-50%) scale(1.06); }
-}
-
-/* 星星 */
-.star {
-    position: absolute;
-    bottom: 360px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 48px;
-    animation: starGlow 2.5s ease-in-out infinite;
-}
-
-@keyframes starGlow {
-    0%,100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.25); }
-}
-
-/* 主卡片 */
-.card {
-    position: relative;
-    z-index: 10;
-    width: 88%;
-    max-width: 360px;
-    margin: auto;
-    top: 50%;
-    transform: translateY(-50%);
-    text-align: center;
-    padding: 30px 22px;
-    background: transparent;
-    border-radius: 22px;
-    box-shadow: none;
-    backdrop-filter: none;
-    animation: float 4s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%,100% { transform: translateY(-50%) translateY(0); }
-    50% { transform: translateY(-50%) translateY(-14px); }
-}
-
-h1 {
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-/* 名字：心跳感 */
-.name {
-    font-size: 20px;
-    margin-bottom: 6px;
-    animation: heartbeat 2.4s infinite;
-}
-
-@keyframes heartbeat {
-    0%,100% {
-        transform: scale(1);
-        text-shadow: 0 0 6px rgba(255,255,255,.4);
-    }
-    50% {
-        transform: scale(1.08);
-        text-shadow: 0 0 16px rgba(255,255,255,.9);
-    }
-}
-
-/* 情话 */
-.message {
-    position: absolute;
-    font-size: 16px;
-    white-space: nowrap;
-    animation: rise 3s ease-out forwards;
-    pointer-events: none;
-}
-
-@keyframes rise {
-    0% { opacity: 0; transform: translateY(10px) scale(0.95); }
-    25% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-140px) scale(1.08); }
-}
-
-/* 爱心爆炸 */
-.heart-burst {
-    position: absolute;
-    font-size: 20px;
-    animation: burst 1.3s ease-out forwards;
-    pointer-events: none;
-}
-
-@keyframes burst {
-    0% { transform: scale(0.3); opacity: 1; }
-    100% {
-        transform: translate(var(--x), var(--y)) scale(1.4) rotate(360deg);
-        opacity: 0;
-    }
-}
-
-/* 星光粒子 */
-.spark {
-    position: absolute;
-    font-size: 12px;
-    opacity: .8;
-    animation: sparkFly 1.6s linear forwards;
-    pointer-events: none;
-}
-
-@keyframes sparkFly {
-    to {
-        transform: translate(var(--sx), var(--sy));
-        opacity: 0;
-    }
-}
-
-/* 雪 */
-.snow {
-    position: absolute;
-    top: -10px;
-    font-size: 14px;
-    animation: snowFall linear infinite;
-}
-
-@keyframes snowFall {
-    to { transform: translateY(110vh); }
+@keyframes fly{
+  from{opacity:1;transform:scale(.6)}
+  to{
+    opacity:0;
+    transform:
+      translate(
+        calc(var(--x) * 1px),
+        calc(var(--y) * 1px)
+      )
+      scale(1.6)
+      rotate(360deg);
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="bg-tree">🎄</div>
-<div class="star">⭐</div>
-
-<div class="card">
-    <h1>平安夜快乐</h1>
-    <div class="name">To 小左 💕</div>
-</div>
-
-<!-- 音频自动防缓存 -->
-<audio id="bgm" loop>
-    <source id="bgmSource" src="https://cdn.pixabay.com/audio/2022/12/05/audio_5a7c3f9db8.mp3?v=20251224">
-</audio>
+<div id="tip">👇 点一下屏幕</div>
+<video id="video" playsinline autoplay muted></video>
 
 <script>
-const messages = [
-    "小左，我好像越来越离不开你了",
-    "靠你近一点，心就乱一点 💗",
-    "如果可以，我想一直这样陪着你",
-    "你在的时候，我什么都不想要",
-    "今晚有点甜，大概是你在我心里",
-    "我好像开始习惯你了",
-    "平安夜，只想被你抱紧",
-    "小左，你能不能别走"
-];
-
-// 摄像头 + 防缓存小画布
-const video = document.createElement('video');
-video.autoplay = true;
-video.playsInline = true;
-video.style.display = 'none';
-document.body.appendChild(video);
-
-const canvas = document.createElement('canvas');
-canvas.width = 80;
-canvas.height = 60;
-const ctx = canvas.getContext('2d');
-
-let lastFrame = null;
+const tip = document.getElementById("tip");
+const video = document.getElementById("video");
 let started = false;
 
-// 创建爱心
-function createHearts(x, y) {
-    for(let i=0;i<14;i++){
-        const h=document.createElement("div");
-        h.className="heart-burst";
-        h.innerText="💖";
-        h.style.left=x+"px";
-        h.style.top=y+"px";
-        h.style.setProperty("--x",(Math.random()*180-90)+"px");
-        h.style.setProperty("--y",(Math.random()*180-90)+"px");
-        document.body.appendChild(h);
-        setTimeout(()=>h.remove(),1300);
-    }
+function hearts(){
+  for(let i=0;i<18;i++){
+    const h=document.createElement("div");
+    h.className="heart";
+    h.innerText="💖";
+    h.style.left=Math.random()*innerWidth+"px";
+    h.style.top=Math.random()*innerHeight+"px";
+    h.style.setProperty("--x",Math.random()*240-120);
+    h.style.setProperty("--y",Math.random()*240-120);
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),1500);
+  }
 }
 
-// 创建星光
-function createSparks(x, y){
-    for(let i=0;i<8;i++){
-        const s=document.createElement("div");
-        s.className="spark";
-        s.innerText="✨";
-        s.style.left=x+"px";
-        s.style.top=y+"px";
-        s.style.setProperty("--sx",(Math.random()*120-60)+"px");
-        s.style.setProperty("--sy",(Math.random()*120-60)+"px");
-        document.body.appendChild(s);
-        setTimeout(()=>s.remove(),1600);
-    }
+async function start(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:"user"},
+      audio:false
+    });
+    video.srcObject = stream;
+
+    // ⚠️ 不做任何帧处理
+    tip.innerText = "🎄 平安夜快乐 ✨";
+    hearts();
+
+  }catch(e){
+    alert("摄像头启动失败");
+  }
 }
 
-// 手势检测
-function detectGesture() {
-    ctx.drawImage(video,0,0,canvas.width,canvas.height);
-    const frame = ctx.getImageData(0,0,canvas.width,canvas.height).data;
-
-    if(lastFrame){
-        let diff = 0;
-        for(let i=0;i<frame.length;i+=16){
-            diff += Math.abs(frame[i] - lastFrame[i]);
-        }
-
-        const palmThreshold = 1200; // 张开手
-        const fistThreshold = 300;  // 握拳
-
-        if(diff > palmThreshold){
-            // 张开手 → 爱心 + 情话
-            createHearts(window.innerWidth/2, window.innerHeight/2);
-            const msg = document.createElement("div");
-            msg.className = "message";
-            msg.innerText = messages[Math.floor(Math.random()*messages.length)];
-            msg.style.left = window.innerWidth/2 + "px";
-            msg.style.top = window.innerHeight/2 + "px";
-            document.body.appendChild(msg);
-            setTimeout(()=>msg.remove(),3000);
-        } else if(diff > fistThreshold){
-            // 握拳 → 星光 + 背景抖动
-            createSparks(window.innerWidth/2, window.innerHeight/2);
-            document.body.style.transform = `translate(${Math.random()*4-2}px,${Math.random()*4-2}px)`;
-            setTimeout(()=>{document.body.style.transform=''},100);
-        }
-    }
-    lastFrame = frame;
-    requestAnimationFrame(detectGesture);
-}
-
-// 启动摄像头
-async function startCamera(){
-    try{
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:"user" }, audio: false });
-        video.srcObject = stream;
-        await video.play();
-        detectGesture();
-
-        // 防缓存：自动给音频加时间戳
-        const bgm = document.getElementById('bgm');
-        const src = document.getElementById('bgmSource');
-        src.src = src.src.split('?')[0] + '?v=' + Date.now();
-        bgm.load();
-        bgm.play();
-    }catch(e){
-        alert("摄像头启动失败");
-        console.error(e);
-    }
-}
-
-// 点击启动
-document.addEventListener("click", (e) => {
-    if(started) return;
-    started = true;
-
-    const bgm = document.getElementById("bgm");
-    if(bgm.paused) bgm.play();
-
-    // 点击也触发爱心和星光动画
-    const msg = document.createElement("div");
-    msg.className = "message";
-    msg.innerText = messages[Math.floor(Math.random()*messages.length)];
-    msg.style.left = e.clientX + "px";
-    msg.style.top = e.clientY + "px";
-    document.body.appendChild(msg);
-    setTimeout(()=>msg.remove(),3000);
-
-    for(let i=0;i<14;i++){
-        const h=document.createElement("div");
-        h.className="heart-burst";
-        h.innerText="💖";
-        h.style.left=e.clientX+"px";
-        h.style.top=e.clientY+"px";
-        h.style.setProperty("--x",(Math.random()*180-90)+"px");
-        h.style.setProperty("--y",(Math.random()*180-90)+"px");
-        document.body.appendChild(h);
-        setTimeout(()=>h.remove(),1300);
-    }
-
-    for(let i=0;i<8;i++){
-        const s=document.createElement("div");
-        s.className="spark";
-        s.innerText="✨";
-        s.style.left=e.clientX+"px";
-        s.style.top=e.clientY+"px";
-        s.style.setProperty("--sx",(Math.random()*120-60)+"px");
-        s.style.setProperty("--sy",(Math.random()*120-60)+"px");
-        document.body.appendChild(s);
-        setTimeout(()=>s.remove(),1600);
-    }
-
-    startCamera();
+document.body.addEventListener("click",()=>{
+  if(started) return;
+  started = true;
+  start();
 });
-
-// 雪花效果
-setInterval(()=>{
-    const snow=document.createElement("div");
-    snow.className="snow";
-    snow.innerText="❄️";
-    snow.style.left=Math.random()*window.innerWidth+"px";
-    snow.style.fontSize=(Math.random()*10+10)+"px";
-    snow.style.animationDuration=(Math.random()*5+5)+"s";
-    document.body.appendChild(snow);
-    setTimeout(()=>snow.remove(),10000);
-},350);
 </script>
 
 </body>
